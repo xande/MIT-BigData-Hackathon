@@ -1,0 +1,49 @@
+---
+title: "Tracking opinions around Ukraine"
+author: "Alex Baranov"
+date: "March 14, 2015"
+output: html_document
+---
+
+```{r}
+#setwd("~/MyDigilife/Labs/Hackathons/MIT-BigData-Hackathon")
+
+d <- read.csv('output/results.csv')
+d$date <- as.Date(d$date)
+d$avg.sentiment <- (d$indico_sentiment + d$roseta_sentiment) / 2
+
+str(d)
+```
+
+```{r}
+sentiment.avg <- aggregate(avg.sentiment ~ date, data = d, FUN = mean) 
+sentiment.indico <- aggregate(indico_sentiment ~ date, data = d, FUN = mean) 
+sentiment.roseta <- aggregate(roseta_sentiment ~ date, data = d, FUN = mean) 
+
+
+```
+
+
+### Indico's opinion around the topic
+```{r}
+plot(sentiment.indico)
+abline(lm(indico_sentiment ~ date, data=sentiment.indico) )
+av = mean(sentiment.indico$indico_sentiment)
+abline(h=av, col="red")
+```
+
+### Rosette's opinion around the topic
+```{r}
+plot(sentiment.roseta)
+abline(lm(roseta_sentiment ~ date, data=sentiment.roseta) )
+av = mean(sentiment.roseta$roseta_sentiment)
+abline(h=av, col="green")
+```
+
+### Avrage opinion
+```{r}
+plot(sentiment.avg)
+abline(lm(avg.sentiment ~ date, data=sentiment.avg) )
+av = mean(sentiment.avg$avg.sentiment)
+abline(h=av, col="blue")
+```
