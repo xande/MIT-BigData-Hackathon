@@ -10,7 +10,7 @@ require 'google-search'
 require 'csv'
 
 KEY_WORD = 'Ukraine' # 
-ROSETTE_API_KEY = 'cc31795098e06510e955a47253798cda'
+ROSETTE_API_KEY = 'PUT YOUR KEY IN HERE'
 
 ##
 # search_news method searches news on Google for the last week using specified keyword.
