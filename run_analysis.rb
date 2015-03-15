@@ -20,12 +20,12 @@ ROSETTE_API_KEY = 'PUT YOUR KEY IN HERE'
 # search_news('Ukraine')
 
 def search_news(key)
-	 queue = []
+  queue = []
 
-	 Google::Search::News.new(:query => key, :tbs => 'sbd:1,qdr:w', 'tbm' => 'nws').each do |s|
-	    queue.push({:url => s.uri, :date_published => s.published})
-	  end
-	  queue
+  Google::Search::News.new(:query => key, :tbs => 'sbd:1,qdr:w', 'tbm' => 'nws').each do |s|
+    queue.push({:url => s.uri, :date_published => s.published})
+  end
+  queue
 end
 
 ##
@@ -36,25 +36,25 @@ end
 #
 
 def parse_articles(queue)
-	articles = []
-	queue.each do |item|
-		begin
-			doc = Pismo::Document.new(item[:url])
-		rescue
-			# no error handling here, sorry 8)
-		end
+  articles = []
+  queue.each do |item|
+    begin
+      doc = Pismo::Document.new(item[:url])
+    rescue
+      # no error handling here, sorry 8)
+    end
 
-		# Save result for further processing if article was succesfully parsed and body length is more than 200 characters
-		if doc 
-			print '.'
-			articles.push({:article => doc, :date_published => item[:date_published]}) if doc.body.length > 200
-		else
-			print '!'
-		end
-	end
-    puts ""
+    # Save result for further processing if article was succesfully parsed and body length is more than 200 characters
+    if doc
+      print '.'
+      articles.push({:article => doc, :date_published => item[:date_published]}) if doc.body.length > 200
+    else
+      print '!'
+    end
+  end
+  puts ""
 
-	articles
+  articles
 end
 
 ##
@@ -62,21 +62,21 @@ end
 # sentiment score for the provided article
 #
 
-def rosette_sentiment(article) 
-	req = {'content' => article}
-	c = Curl::Easy.http_post("https://api.rosette.com/rest/v1/sentiment", req.to_json) do |http|
-		http.headers['user_key'] = ROSETTE_API_KEY
-		http.headers['Accept'] = 'application/json'
-		http.headers['Content-Type'] = 'application/json'
-	end
+def rosette_sentiment(article)
+  req = {'content' => article}
+  c = Curl::Easy.http_post("https://api.rosette.com/rest/v1/sentiment", req.to_json) do |http|
+    http.headers['user_key'] = ROSETTE_API_KEY
+    http.headers['Accept'] = 'application/json'
+    http.headers['Content-Type'] = 'application/json'
+  end
 
-	response = JSON.parse(c.body_str)
+  response = JSON.parse(c.body_str)
 
-	if response && response['sentiment']
-		pos_confidence = response['sentiment'].select {|s| s["label"] == 'pos' }
-	end
+  if response && response['sentiment']
+    pos_confidence = response['sentiment'].select {|s| s["label"] == 'pos' }
+  end
 
-	pos_confidence ? pos_confidence[0]['confidence'] : nil
+  pos_confidence ? pos_confidence[0]['confidence'] : nil
 end
 
 puts "Serching for #{KEY_WORD}-related articles on Google News..."
@@ -88,22 +88,22 @@ results = []
 
 puts "Running sentiment analysis for the articles..."
 articles.each do |a|
-	puts "===================="
-	puts a[:article].title
-	puts a[:date_published]
-	puts a[:article].url
+  puts "===================="
+  puts a[:article].title
+  puts a[:date_published]
+  puts a[:article].url
 
-	indico_sentiment = Indico.sentiment(a[:article].body) # Calling Indico API to get the score http://indico.readme.io/v1.0/docs/sentiment
-	rosette_sentiment = rosette_sentiment(a[:article].body) # Getting Basis Tech sentiment score
+  indico_sentiment = Indico.sentiment(a[:article].body) # Calling Indico API to get the score http://indico.readme.io/v1.0/docs/sentiment
+  rosette_sentiment = rosette_sentiment(a[:article].body) # Getting Basis Tech sentiment score
 
-	puts "* indico sentiment score: " + indico_sentiment.to_s
-	puts "* rosette sentiment score: " + rosette_sentiment.to_s
+  puts "* indico sentiment score: " + indico_sentiment.to_s
+  puts "* rosette sentiment score: " + rosette_sentiment.to_s
 
-	results.push([a[:article].title, 
-				  a[:date_published], 
-				  a[:article].url, 
-				  indico_sentiment,
-				  rosette_sentiment])
+  results.push([a[:article].title,
+                a[:date_published],
+                a[:article].url,
+                indico_sentiment,
+                rosette_sentiment])
 
 end
 
